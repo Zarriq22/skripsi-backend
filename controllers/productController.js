@@ -6,10 +6,26 @@ const getAllProducts = async (req, res) => {
   res.json(products);
 };
 
+const getProductById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const produk = await Product.findById(id);
+
+    if (!produk) {
+      return res.status(404).json({ message: 'produk tidak ditemukan' });
+    }
+
+    res.json(produk);
+  } catch (error) {
+    res.status(500).json({ message: 'Gagal mengambil produk', error: error.message });
+  }
+};
+
 // POST produk baru
 const addProduct = async (req, res) => {
-  const { name, price } = req.body;
-  const product = new Product({ name, price });
+  const { productName, price, stock, image, description } = req.body;
+  const product = new Product({ productName, price, stock, image, description });
   await product.save();
   res.status(201).json({ message: 'Produk disimpan', data: product });
 };
@@ -17,13 +33,13 @@ const addProduct = async (req, res) => {
 // PUT: Update produk
 const updateProduct = async (req, res) => {
   const { id } = req.params;
-  const { name, price } = req.body;
+  const { productName, price, stock, image, description } = req.body;
 
   try {
     const updated = await Product.findByIdAndUpdate(
       id,
-      { name, price },
-      { new: true }
+      { productName, price, stock, image, description },
+      { new: true },
     );
 
     if (!updated) {
@@ -55,6 +71,7 @@ const deleteProduct = async (req, res) => {
 
 module.exports = {
   getAllProducts,
+  getProductById,
   addProduct,
   updateProduct,
   deleteProduct
