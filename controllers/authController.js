@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 // REGISTER
 const registerUser = async (req, res) => {
-  const { username, password, initialName, avatar, isAdmin } = req.body;
+  const { username, password, initialName, avatar, userType } = req.body;
 
   try {
     // Cek user sudah ada?
@@ -16,7 +16,7 @@ const registerUser = async (req, res) => {
     const hashed = await bcrypt.hash(password, salt);
 
     // Simpan user baru
-    const user = new User({ username, password: hashed, initialName, avatar, isAdmin: !!isAdmin });
+    const user = new User({ username, password: hashed, initialName, avatar, userType });
     await user.save();
 
     res.status(201).json({ message: 'Register berhasil', userId: user._id });
@@ -38,7 +38,7 @@ const loginUser = async (req, res) => {
 
     // Buat token JWT
     const token = jwt.sign(
-      { userId: user._id, isAdmin: user.isAdmin },
+      { userId: user._id, userType: user.userType },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
@@ -49,7 +49,7 @@ const loginUser = async (req, res) => {
       user: {
         id: user._id,
         username: user.username,
-        role: user.isAdmin ? 'admin' : 'user',
+        role: user.userType === 1 ? 'admin' : 'user',
         initialName: user.initialName
       }
     });
@@ -82,17 +82,17 @@ const getUserById = async (req, res) => {
 };
 
 const addUser = async (req, res) => {
-  const { username, password, initialName, isAdmin } = req.body;
+  const { username, password, initialName, userType } = req.body;
   const salt = await bcrypt.genSalt(10);
   const hashed = await bcrypt.hash(password, salt);
-  const user = new User({ username, password: hashed, initialName, isAdmin });
+  const user = new User({ username, password: hashed, initialName, userType });
   await user.save();
   res.status(201).json({ message: 'User disimpan', data: user });
 };
 
 const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { username, password, initialName, isAdmin } = req.body;
+  const { username, password, initialName, userType } = req.body;
 
   const salt = await bcrypt.genSalt(10);
   const hashed = await bcrypt.hash(password, salt);
@@ -100,7 +100,7 @@ const updateUser = async (req, res) => {
   try {
     const updated = await User.findByIdAndUpdate(
       id,
-      { username, password: hashed, initialName, isAdmin },
+      { username, password: hashed, initialName, userType },
       { new: true }
     );
 
