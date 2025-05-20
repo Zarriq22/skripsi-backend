@@ -13,6 +13,8 @@ const chatRoutes = require('./routes/chatRoutes');
 const app = express();
 const PORT = 5000;
 
+const allowedOrigins = ['https://skripsi-frontend-sigma.vercel.app'];
+
 // koneksi database
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -23,8 +25,14 @@ mongoose.connect(process.env.MONGO_URI, {
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:3000',
-  credentials: true
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true // Penting kalau kamu pakai cookie/token
 }));
 app.use(express.json());
 
