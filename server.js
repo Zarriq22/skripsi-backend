@@ -25,14 +25,8 @@ mongoose.connect(process.env.MONGO_URI, {
 
 // Middleware
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true // Penting kalau kamu pakai cookie/token
+  origin: ['http://localhost:3000', 'https://your-frontend-url.vercel.app'],
+  credentials: true
 }));
 app.use(express.json());
 
