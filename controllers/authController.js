@@ -81,6 +81,22 @@ const getUserById = async (req, res) => {
   }
 };
 
+const getUserByUsername = async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const user = await User.findOne({username});
+
+    if (!user) {
+      return res.status(404).json({ message: 'User tidak ditemukan' });
+    }
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Gagal mengambil user', error: error.message });
+  }
+};
+
 const addUser = async (req, res) => {
   const { username, password, initialName, userType } = req.body;
   const salt = await bcrypt.genSalt(10);
@@ -154,4 +170,4 @@ const updatePassword = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, getAllUsers, getUserById, addUser, updateUser, updatePassword, deleteUser };
+module.exports = { registerUser, loginUser, getAllUsers, getUserById, getUserByUsername, addUser, updateUser, updatePassword, deleteUser };

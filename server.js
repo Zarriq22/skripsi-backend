@@ -7,6 +7,8 @@ const mongoose = require('mongoose');
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const cartRoutes = require('./routes/cartRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 
 const app = express();
 const PORT = 5000;
@@ -35,6 +37,12 @@ app.use('/api/products', productRoutes);
 
 // Routes upload
 app.use('/api/upload', uploadRoutes);
+
+// Routes cart
+app.use('/api/carts', cartRoutes);
+
+// Routes chat
+app.use('/api/chat', chatRoutes);
 
 // Cek koneksi
 app.get('/', (req, res) => {

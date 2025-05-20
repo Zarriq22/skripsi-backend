@@ -1,25 +1,46 @@
 const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
   productName: { 
     type: String, 
-    required: true 
   },
   price: { 
     type: Number, 
-    required: true 
   },
   stock: {
     type: Number,
     default: 0
   },
   image: {
-    type: [String],
-    required: true
+    type: [String]
   },
   description: {
     type: String,
-    required: true
+  },
+  wishList: {
+    type: Boolean,
+    default: false
+  },
+  wishListId: {
+    type: String,
+  },
+  kategori: {
+    type: String,
+  },
+  subKategori: {
+    type: String,
+  },
+  rating: {
+    type: Number,
+    default: 0
+  },
+  terjual: {
+    type: Number,
+    default: 0
   }
 });
 
