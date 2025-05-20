@@ -8,7 +8,6 @@ const AvatarSchema = new mongoose.Schema({
   },
   avatar: { 
     type: String, 
-    required: true 
     }, // base64 string
 });
 

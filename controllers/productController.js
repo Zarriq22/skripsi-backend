@@ -24,8 +24,8 @@ const getProductById = async (req, res) => {
 
 // POST produk baru
 const addProduct = async (req, res) => {
-  const { productName, price, stock, image, description } = req.body;
-  const product = new Product({ productName, price, stock, image, description });
+  const { productName, price, stock, image, description, wishList, wishListId, kategori, subKategori, rating, terjual } = req.body;
+  const product = new Product({ productName, price, stock, image, description, wishList, wishListId, kategori, subKategori, rating, terjual });
   await product.save();
   res.status(201).json({ message: 'Produk disimpan', data: product });
 };
@@ -33,12 +33,12 @@ const addProduct = async (req, res) => {
 // PUT: Update produk
 const updateProduct = async (req, res) => {
   const { id } = req.params;
-  const { productName, price, stock, image, description } = req.body;
+  const { productName, price, stock, image, description, wishList, wishListId, kategori, subKategori, rating, terjual } = req.body;
 
   try {
     const updated = await Product.findByIdAndUpdate(
       id,
-      { productName, price, stock, image, description },
+      { productName, price, stock, image, description, wishList, wishListId, kategori, subKategori, rating, terjual },
       { new: true },
     );
 
@@ -69,10 +69,27 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+const getProductByWishListId = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const produk = await Product.find({ wishListId: id });
+
+    if (!produk) {
+      return res.status(404).json({ message: 'produk tidak ditemukan' });
+    }
+
+    res.json(produk);
+  } catch (error) {
+    res.status(500).json({ message: 'Gagal mengambil produk', error: error.message });
+  }
+};
+
 module.exports = {
   getAllProducts,
   getProductById,
   addProduct,
   updateProduct,
-  deleteProduct
+  deleteProduct,
+  getProductByWishListId
 };
