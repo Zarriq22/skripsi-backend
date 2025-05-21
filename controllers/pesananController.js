@@ -22,8 +22,8 @@ const getPesananByUserId = async (req, res) => {
 
 const addPesanan = async (req, res) => {
     try {
-        const { productName, productId, userId, price, image, description, status } = req.body;
-        const pesanan = new Pesanan({ productName, productId, userId, price, image, description, status });
+        const { productName, productId, userId, price, image, description, status, alamat, kurir } = req.body;
+        const pesanan = new Pesanan({ productName, productId, userId, price, image, description, status, alamat, kurir });
         
         await pesanan.save();
         

@@ -10,6 +10,7 @@ const uploadRoutes = require('./routes/uploadRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const pesananRoutes = require('./routes/pesananRoutes');
+const addressRoutes = require('./routes/addressRoutes');
 
 const app = express();
 const PORT = 5000;
@@ -66,6 +67,9 @@ app.use('/api/chat', chatRoutes);
 
 // Routes pesanan
 app.use('/api/pesanan', pesananRoutes);
+
+// Routes address
+app.use('/api/address', addressRoutes);
 
 // Cek koneksi
 app.get('/', (req, res) => {

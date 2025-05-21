@@ -29,6 +29,12 @@ const pesananSchema = new mongoose.Schema({
   },
   resi: {
     type: String,
+  },
+  alamat: {
+    type: String,
+  },
+  kurir: {
+    type: String,
   }
 });
 
