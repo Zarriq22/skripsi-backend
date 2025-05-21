@@ -9,6 +9,7 @@ const productRoutes = require('./routes/productRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const pesananRoutes = require('./routes/pesananRoutes');
 
 const app = express();
 const PORT = 5000;
@@ -39,7 +40,13 @@ app.use(cors({
   },
   credentials: true
 }));
-app.use(express.json());
+
+// Mengatur limit untuk muatan JSON
+app.use(express.json({ limit: '50mb' }));
+
+// Mengatur limit untuk muatan URL-encoded
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
 
 // Route user
 app.use('/api/auth', authRoutes);
@@ -56,6 +63,9 @@ app.use('/api/carts', cartRoutes);
 
 // Routes chat
 app.use('/api/chat', chatRoutes);
+
+// Routes pesanan
+app.use('/api/pesanan', pesananRoutes);
 
 // Cek koneksi
 app.get('/', (req, res) => {

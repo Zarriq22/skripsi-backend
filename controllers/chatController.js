@@ -1,14 +1,32 @@
 const fetch = require('node-fetch');
 const ChatHistory = require('../models/ChatHistory');
+const Product = require('../models/Product');
 require('dotenv').config();
 
 const handleChat = async (req, res) => {
-    const { userId, message } = req.body;
+    const { userId, message, productId } = req.body;
 
-    const systemPrompt = {
-        role: "system",
-        content: "Kamu adalah chatbot layanan pelanggan untuk toko online. Jawablah dengan sopan, singkat, dan hanya seputar produk, pengiriman, pembayaran, dan kebijakan toko."
-    };
+    let productInfo = '';
+        if (productId) {
+            const product = await Product.findById(productId);
+            if (product) {
+                productInfo = `\nNama Produk: ${product.productName}\nDeskripsi: ${product.description}\nHarga: Rp${product.price}\nStok: ${product.stock}`;
+            }
+        }
+
+        const systemPrompt = {
+            role: 'system',
+            content: `Kamu adalah chatbot toko fashion online. Jawab dengan sopan dan hanya terkait produk fashion dan gunakan selalu Bahasa Indonesia. Abaikan pertanyaan di luar topik.
+
+            ketentuan penting:
+            - pembayaran hanya ketika checkout.
+            - pembayaran hanya melalui BRI, BCA, dan BSI.
+            - produk tidak dapat diubah atau ditukar setelah checkout.
+            - pengiriman hanya JNE dan J&T.
+
+            Berikut info produk jika diperlukan:
+            ${productInfo}`
+        };
 
     const messages = [systemPrompt, ...message];
 
@@ -24,6 +42,12 @@ const handleChat = async (req, res) => {
                 messages: messages
             })
         });
+
+        if (!response.ok) {
+            const errText = await response.text();
+            console.error('DeepSeek API error:', response.status, errText);
+            return res.status(500).json({ error: 'DeepSeek API bermasalah.' });
+        }
 
         const data = await response.json();
         const reply = data.choices[0].message;
