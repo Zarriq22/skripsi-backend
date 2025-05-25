@@ -76,6 +76,6 @@ app.get('/', (req, res) => {
   res.send('API is running...');
 });
 
-app.listen(PORT, () => {
-  console.log(`Server berjalan di http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server berjalan di http://0.0.0.0:${PORT}`);
 });
