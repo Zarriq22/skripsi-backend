@@ -8,6 +8,10 @@ const addressSchema = new mongoose.Schema({
         {
             alamat: {
                 type: String,
+            },
+            alamatUtama: {
+                type: Boolean,
+                default: false
             }
         }
     ]

@@ -6,6 +6,13 @@ const getAllAddress = async (req, res) => {
     res.json(address);
 };
 
+const getAddressByAddressId = async (req, res) => {
+    const { userId } = req.params;
+    const address = await Address.findOne({ userId })
+
+    res.json(address);
+};
+
 // Tambah alamat (push ke array)
 const addAddress = async (req, res) => {
     const { userId, alamat } = req.body;
@@ -41,7 +48,7 @@ const addAddress = async (req, res) => {
 
 // Ubah alamat berdasarkan index di array
 const updateAddress = async (req, res) => {
-    const { userId, alamatBaru } = req.body;
+    const { userId, alamatBaru, alamatUtama } = req.body;
     const { id } = req.params; // ini _id dari address yang mau diupdate
 
     try {
@@ -60,6 +67,7 @@ const updateAddress = async (req, res) => {
 
         // Update alamatnya
         subdoc.alamat = alamatBaru;
+        subdoc.alamatUtama = alamatUtama;
 
         await addressDoc.save();
 
@@ -77,24 +85,24 @@ const updateAddress = async (req, res) => {
 
 // Hapus alamat berdasarkan index
 const deleteAddressById = async (req, res) => {
-  const { userId } = req.body;
-  const { id } = req.params;
+    const { userId } = req.body;
+    const { id } = req.params;
 
-  try {
-    const updatedDoc = await Address.findOneAndUpdate(
-      { userId, 'address._id': id },
-      { $pull: { address: { _id: id } } },
-      { new: true }
-    );
+    try {
+        const updatedDoc = await Address.findOneAndUpdate(
+        { userId, 'address._id': id },
+        { $pull: { address: { _id: id } } },
+        { new: true }
+        );
 
-    if (!updatedDoc) {
-      return res.status(404).json({ message: 'Alamat dengan id tersebut tidak ditemukan' });
+        if (!updatedDoc) {
+        return res.status(404).json({ message: 'Alamat dengan id tersebut tidak ditemukan' });
+        }
+
+        res.json({ message: 'Alamat berhasil dihapus', data: updatedDoc.address });
+    } catch (error) {
+        res.status(500).json({ message: 'Gagal menghapus alamat', error: error.message });
     }
-
-    res.json({ message: 'Alamat berhasil dihapus', data: updatedDoc.address });
-  } catch (error) {
-    res.status(500).json({ message: 'Gagal menghapus alamat', error: error.message });
-  }
 };
 
 const deleteAddress = async (req, res) => {
@@ -115,6 +123,7 @@ const deleteAddress = async (req, res) => {
 
 module.exports = {
     getAllAddress,
+    getAddressByAddressId,
     addAddress,
     updateAddress,
     deleteAddressById,

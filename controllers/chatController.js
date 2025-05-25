@@ -5,28 +5,70 @@ require('dotenv').config();
 
 const handleChat = async (req, res) => {
     const { userId, message, productId } = req.body;
-
     let productInfo = '';
-        if (productId) {
-            const product = await Product.findById(productId);
-            if (product) {
-                productInfo = `\nNama Produk: ${product.productName}\nDeskripsi: ${product.description}\nHarga: Rp${product.price}\nStok: ${product.stock}`;
-            }
+
+    // Ambil pesan terakhir dari user
+    const lastUserMessage = Array.isArray(message)
+        ? message.slice().reverse().find(m => m.role === 'user')?.content || ''
+        : '';
+
+    const getFilteredProducts = async (text) => {
+        const allProducts = await Product.find();
+        const lowerInput = text.toLowerCase();
+        const words = lowerInput
+            .replace(/[^\w\s]/gi, '')
+            .split(/\s+/)
+            .filter(w => w.length > 2);
+
+        return allProducts.filter(product => {
+            const productName = product.productName?.toLowerCase() || '';
+            const category = product.kategori?.toString().toLowerCase() || '';
+
+            const nameMatch = words.some(word => productName.includes(word));
+            const categoryMatch = words.some(word => category.includes(word));
+
+            return nameMatch || categoryMatch;
+        });
+    };
+
+    // Prioritas 1: Jika user klik dari halaman produk
+    if (productId) {
+        const product = await Product.findById(productId);
+        if (product) {
+            productInfo = `\nNama Produk: ${product.productName}\nDeskripsi: ${product.description}\nHarga: Rp${product.price}\nStok: ${product.stock}`;
         }
+    }
+    // Prioritas 2: Jika user tanya langsung
+    else if (lastUserMessage) {
+        const relatedProducts = await getFilteredProducts(lastUserMessage);
 
-        const systemPrompt = {
-            role: 'system',
-            content: `Kamu adalah chatbot toko fashion online. Jawab dengan sopan dan hanya terkait produk fashion dan gunakan selalu Bahasa Indonesia. Abaikan pertanyaan di luar topik.
+        // Ambil max 3 produk biar gak overload prompt
+        const topProducts = relatedProducts.slice(0, 3);
 
-            ketentuan penting:
-            - pembayaran hanya ketika checkout.
-            - pembayaran hanya melalui BRI, BCA, dan BSI.
-            - produk tidak dapat diubah atau ditukar setelah checkout.
-            - pengiriman hanya JNE dan J&T.
+        if (topProducts.length > 0) {
+            productInfo = topProducts.map(p => (
+                `\nNama Produk: ${p.productName}\nDeskripsi: ${p.description}\nHarga: Rp${p.price}\nStok: ${p.stock}`
+            )).join('\n\n');
+        }
+    }
 
-            Berikut info produk jika diperlukan:
-            ${productInfo}`
-        };
+    const systemPrompt = {
+  role: 'system',
+  content: `Kamu adalah chatbot toko fashion online. Jawabanmu HARUS berdasarkan informasi produk yang DIBERIKAN di bawah ini. 
+        JANGAN menyebut produk lain yang tidak disebutkan. Jika tidak ada produk yang relevan, cukup beri jawaban sopan seperti "Maaf, kami tidak menemukan produk yang sesuai saat ini."
+
+        Gunakan Bahasa Indonesia. Jangan jawab pertanyaan yang tidak berkaitan dengan fashion.
+
+        Ketentuan toko:
+        - Pembayaran hanya saat checkout.
+        - Metode pembayaran: BRI, BCA, dan BSI.
+        - Produk tidak bisa ditukar setelah checkout.
+        - Pengiriman via JNE atau J&T.
+
+        Daftar produk yang tersedia saat ini:
+        ${productInfo || "Tidak ada produk yang sesuai."}`
+    };
+
 
     const messages = [systemPrompt, ...message];
 
@@ -52,7 +94,6 @@ const handleChat = async (req, res) => {
         const data = await response.json();
         const reply = data.choices[0].message;
 
-        // Simpan ke database
         const chatDoc = new ChatHistory({
             userId,
             messages: [...message, reply],
@@ -66,6 +107,7 @@ const handleChat = async (req, res) => {
         res.status(500).json({ error: 'Terjadi kesalahan saat memproses chat.' });
     }
 };
+
 
 const getChatHistoryByUser = async (req, res) => {
     const { userId } = req.params;
