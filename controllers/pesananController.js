@@ -50,9 +50,19 @@ const updateStatusPesanan = async (req, res) => {
     }
 };
 
+const deleteAllPesanan = async (req, res) => {
+    try {
+        await Pesanan.deleteMany({});
+        res.json({ message: 'Semua pesanan berhasil dihapus' });
+    } catch (error) {
+        res.status(500).json({ message: 'Gagal menghapus pesanan', error: error.message });
+    }
+};
+
 module.exports = {
     getAllPesanan,
     getPesananByUserId,
     addPesanan,
-    updateStatusPesanan
+    updateStatusPesanan,
+    deleteAllPesanan
 };

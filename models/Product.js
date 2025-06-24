@@ -15,11 +15,28 @@ const productSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  image: {
-    type: [String]
-  },
+  images: [
+    {
+      filename: String,
+      path: String
+    }
+  ],
   description: {
     type: String,
+  },
+  spesifikasi: {
+    bahan: {
+      type: String,
+    },
+    ukuran: {
+      type: String,
+    },
+    warna: {
+      type: String,
+    },
+    fitur: {
+      type: [String],
+    }
   },
   wishList: {
     type: Boolean,
@@ -31,7 +48,7 @@ const productSchema = new mongoose.Schema({
   kategori: {
     type: String,
   },
-  subKategori: {
+  gender: {
     type: String,
   },
   rating: {
@@ -41,6 +58,9 @@ const productSchema = new mongoose.Schema({
   terjual: {
     type: Number,
     default: 0
+  },
+  uploadImageId: {
+    type: String,
   }
 });
 

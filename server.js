@@ -2,7 +2,10 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const mongoose = require('mongoose');
+
+const qdrant = require('./utils/services/qdrant');
 
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
@@ -56,8 +59,28 @@ app.use('/api/users', authRoutes);
 // Routes produk
 app.use('/api/products', productRoutes);
 
+app.get('/setup-qdrant-index', async (req, res) => {
+  try {
+    await qdrant.createPayloadIndex('products', {
+      field_name: 'gender',
+      field_schema: 'keyword'
+    });
+
+    await qdrant.createPayloadIndex('products', {
+      field_name: 'kategori',
+      field_schema: 'keyword'
+    });
+
+    res.json({ message: 'Index berhasil dibuat' });
+  } catch (err) {
+    console.error(err.response?.data || err);
+    res.status(500).json({ error: 'Gagal membuat index' });
+  }
+});
+
 // Routes upload
 app.use('/api/upload', uploadRoutes);
+app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes cart
 app.use('/api/carts', cartRoutes);

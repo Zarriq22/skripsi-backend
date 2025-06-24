@@ -1,14 +1,19 @@
 const mongoose = require('mongoose');
 
-const AvatarSchema = new mongoose.Schema({
-  userId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'User', 
-    unique: true 
+const UploadSchema = new mongoose.Schema({
+  files: [
+    {
+      filename: String,
+      path: String
+    }
+  ],
+  productId: {
+    type: String,
   },
-  avatar: { 
-    type: String, 
-    }, // base64 string
-});
+  userId: {
+    type: String
+  }
+}, { timestamps: true });
 
-module.exports = mongoose.model('Avatar', AvatarSchema);
+const Upload = mongoose.model('Upload', UploadSchema);
+module.exports = Upload;
