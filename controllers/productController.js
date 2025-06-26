@@ -84,21 +84,21 @@ const addProduct = async (req, res) => {
   }));
 
   await qdrant.upsert('products', { points });
-  const iQdrant = points[0].id 
+  // const iQdrant = points[0].id 
 
-  const response = await fetch(`${process.env.QDRANT_URL}/collections/products/points/delete`, {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.QDRANT_API_KEY}`
-      },
-      body: {
-        point: [
-          iQdrant
-        ]
-      }
-  });
-  console.log(response)
+  // const response = await fetch(`${process.env.QDRANT_URL}/collections/products/points/delete`, {
+  //     method: 'POST',
+  //     headers: {
+  //         'Content-Type': 'application/json',
+  //         'Authorization': `Bearer ${process.env.QDRANT_API_KEY}`
+  //     },
+  //     body: {
+  //       point: [
+  //         iQdrant
+  //       ]
+  //     }
+  // });
+  // console.log(response)
   res.status(201).json({ message: 'Produk disimpan', data: product });
 };
 
