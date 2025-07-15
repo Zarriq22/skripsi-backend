@@ -214,7 +214,7 @@ const handleChat = async (req, res) => {
             {
                 role: 'system',
                 content: `Kamu adalah asisten e-commerce yang menjawab hanya berdasarkan informasi produk berikut:\n${contextText}\n
-                    Jawab dengan sopan jika produk tidak tersedia. 
+                    Jawab dengan sopan jika produk tidak tersedia. Balas sapaan dengan sapaan terlebih dahulu, dan itu bukan menanyakan produk. 
                     Pengiriman hanya JNE dan J&T. Pembayaran via BCA, BRI, BSI. Lacak pesanan di menu Pesanan Saya`
             },
             ...message
