@@ -22,6 +22,7 @@ const PORT = 5000;
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+
 })
 .then(() => console.log('✅ Terhubung ke MongoDB'))
 .catch(err => console.error('❌ Gagal konek MongoDB:', err));
@@ -96,6 +97,7 @@ app.use('/api/address', addressRoutes);
 
 // Cek koneksi
 app.get('/', (req, res) => {
+  req.setTimeout(30000);
   res.send('API is running...');
 });
 
