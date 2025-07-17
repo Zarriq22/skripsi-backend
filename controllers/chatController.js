@@ -14,8 +14,6 @@ require('dotenv').config();
 //         ? message.slice().reverse().find(m => m.role === 'user')?.content || ''
 //         : '';
 
-// /*************  ✨ Windsurf Command ⭐  *************/
-// /*******  20db4372-43ce-4f01-8920-6b7226da4369  *******/
 //     const getFilteredProducts = async (text) => {
 //         const allProducts = await Product.find();
 //         const lowerInput = text.toLowerCase();
@@ -116,7 +114,7 @@ require('dotenv').config();
 
 const handleChat = async (req, res) => {
     const allProducts = await Product.find();
-    const { userId, message } = req.body;
+    const { userId, message, productId } = req.body;
 
     const kategoriSynonyms = {
         "Pakaian": ['pakaian', 'baju', 'kemeja', 'kaos', 'jaket', 'outfit', 'atasan'],
@@ -139,77 +137,87 @@ const handleChat = async (req, res) => {
         Unisex: ['unisex', 'semua gender']
     };
 
+    let contextText
+
     try {
-        const userQuestion = message[message.length - 1]?.content;
-        if (!userQuestion) return res.status(400).json({ error: 'Pertanyaan tidak ditemukan.' });
-
-        // 1. Dapatkan embedding dari pertanyaan user
-        const queryVector = await getEmbedding(userQuestion);
-
-        const isNegated = (text, word) => {
-            return text.includes(`bukan ${word}`) || 
-               text.includes(`tidak ${word}`) || 
-               text.includes(`selain ${word}`);
-        };
-
-        // 2. Deteksi filter kategori dan gender dari pertanyaan
-        const detectFiltersFromText = (text) => {
-            text = text.toLowerCase();
-
-            let kategori = null;
-            let gender = null;
-
-            // Cek kategori
-            for (const [key, synonyms] of Object.entries(kategoriSynonyms)) {
-                if (synonyms.some(word => text.includes(word))) {
-                    kategori = key;
-                    break;
-                }
+        if (productId) {
+            // Jika response mendapat productId
+            const product = await Product.findById(productId);
+            if (product) {
+                contextText = `${product.productName} — Rp${product.price} (stok ${product.stock}) — ${product.description}`;
             }
+        } else {
+            const userQuestion = message[message.length - 1]?.content;
+            if (!userQuestion) return res.status(400).json({ error: 'Pertanyaan tidak ditemukan.' });
 
-            // Cek gender
-            for (const [key, synonyms] of Object.entries(genderSynonyms)) {
-                for (const word of synonyms) {
-                    if (isNegated(text, word)) {
-                        excludeGender = key;
-                        break;
-                    } else if (text.includes(word)) {
-                        gender = key;
+            // Dapatkan embedding dari pertanyaan user
+            const queryVector = await getEmbedding(userQuestion);
+
+            const isNegated = (text, word) => {
+                return text.includes(`bukan ${word}`) || 
+                text.includes(`tidak ${word}`) || 
+                text.includes(`selain ${word}`);
+            };
+
+            // Deteksi filter kategori dan gender dari pertanyaan
+            const detectFiltersFromText = (text) => {
+                text = text.toLowerCase();
+
+                let kategori = null;
+                let gender = null;
+
+                // Cek kategori
+                for (const [key, synonyms] of Object.entries(kategoriSynonyms)) {
+                    if (synonyms.some(word => text.includes(word))) {
+                        kategori = key;
                         break;
                     }
                 }
+
+                // Cek gender
+                for (const [key, synonyms] of Object.entries(genderSynonyms)) {
+                    for (const word of synonyms) {
+                        if (isNegated(text, word)) {
+                            excludeGender = key;
+                            break;
+                        } else if (text.includes(word)) {
+                            gender = key;
+                            break;
+                        }
+                    }
+                }
+
+                return { kategori, gender };
+            };
+
+            const { gender, kategori } = detectFiltersFromText(userQuestion);
+
+            // Filter Qdrant
+            const mustFilter = [];
+            if (gender) mustFilter.push({ key: "gender", match: { value: gender }});
+            if (kategori) mustFilter.push({ key: "kategori", match: { value: kategori }});
+
+            // Cari produk relevan di Qdrant dengan filter
+            const searchResult = await qdrant.search('products', {
+                vector: queryVector,
+                limit: allProducts.length,
+                with_payload: true,
+                with_vector: false,
+                filter: mustFilter.length ? { must: mustFilter } : undefined
+            });
+
+            // Format konteks produk
+            contextText = 'Tidak ada produk relevan ditemukan.';
+            if (searchResult.length) {
+                const contexts = searchResult.map((hit, i) => {
+                    const p = hit.payload;
+                    return `${i + 1}. ${p.productName} — Rp${p.price} (stok ${p.stock}) — ${p.description}`;
+                }).join('\n');
+                contextText = `Berikut daftar produk relevan:\n${contexts}`;
             }
-
-            return { kategori, gender };
-        };
-
-        const { gender, kategori } = detectFiltersFromText(userQuestion);
-
-        // 3. Bangun filter Qdrant
-        const mustFilter = [];
-        if (gender) mustFilter.push({ key: "gender", match: { value: gender }});
-        if (kategori) mustFilter.push({ key: "kategori", match: { value: kategori }});
-
-        // 4. Cari produk relevan di Qdrant dengan filter
-        const searchResult = await qdrant.search('products', {
-            vector: queryVector,
-            limit: allProducts.length,
-            with_payload: true,
-            with_vector: false,
-            filter: mustFilter.length ? { must: mustFilter } : undefined
-        });
-
-        // 5. Format konteks produk
-        let contextText = 'Tidak ada produk relevan ditemukan.';
-        if (searchResult.length) {
-            const contexts = searchResult.map((hit, i) => {
-                const p = hit.payload;
-                return `${i + 1}. ${p.productName} — Rp${p.price} (stok ${p.stock}) — ${p.description}`;
-            }).join('\n');
-            contextText = `Berikut daftar produk relevan:\n${contexts}`;
         }
 
-        // 6. Format prompt ke DeepSeek
+        // Format prompt ke DeepSeek
         const messagesWithContext = [
             {
                 role: 'system',
@@ -220,7 +228,7 @@ const handleChat = async (req, res) => {
             ...message
         ];
 
-        // 7. Kirim ke DeepSeek
+        // Kirim ke DeepSeek
         const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
             method: 'POST',
             headers: {
