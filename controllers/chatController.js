@@ -225,7 +225,8 @@ const handleChat = async (req, res) => {
                 content: `Kamu adalah asisten e-commerce yang menjawab hanya berdasarkan informasi produk berikut:\n${contextText}\n
                     Jawab dengan sopan jika produk tidak tersedia. Balas sapaan dengan sapaan terlebih dahulu, dan itu bukan menanyakan produk. 
                     Pengiriman hanya JNE dan J&T. Pembayaran via BCA, BRI, BSI. Lacak pesanan di menu Pesanan Saya.
-                    Jika terdapat link produk, selalu tampilkan dalam format markdown: [Lihat Produk](URL_LINK).`
+                    Jika terdapat link produk, selalu tampilkan dalam format markdown: [Lihat Produk](URL_LINK). 
+                    Jika tidak ada produk yang sesuai, balas dengan "Maaf, kami tidak menemukan produk yang sesuai saat ini."`
             },
             ...message
         ];
