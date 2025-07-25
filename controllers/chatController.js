@@ -138,13 +138,14 @@ const handleChat = async (req, res) => {
     };
 
     let contextText
+    const baseUrl = process.env.WEB_APPLICATION
 
     try {
         if (productId) {
             // Jika response mendapat productId
             const product = await Product.findById(productId);
             if (product) {
-                contextText = `${product.productName} — Rp${product.price} (stok ${product.stock}) — ${product.description}`;
+                contextText = `${product.productName} — Rp${product.price} (stok ${product.stock}) — ${product.description} — Link: ${baseUrl}/${product.link}`;
             }
         } else {
             const userQuestion = message[message.length - 1]?.content;
@@ -211,7 +212,7 @@ const handleChat = async (req, res) => {
             if (searchResult.length) {
                 const contexts = searchResult.map((hit, i) => {
                     const p = hit.payload;
-                    return `${i + 1}. ${p.productName} — Rp${p.price} (stok ${p.stock}) — ${p.description}`;
+                    return `${i + 1}. ${p.productName} — Rp${p.price} (stok ${p.stock}) — ${p.description} - Link: ${baseUrl}/${p.link}`;
                 }).join('\n');
                 contextText = `Berikut daftar produk relevan:\n${contexts}`;
             }
@@ -223,7 +224,8 @@ const handleChat = async (req, res) => {
                 role: 'system',
                 content: `Kamu adalah asisten e-commerce yang menjawab hanya berdasarkan informasi produk berikut:\n${contextText}\n
                     Jawab dengan sopan jika produk tidak tersedia. Balas sapaan dengan sapaan terlebih dahulu, dan itu bukan menanyakan produk. 
-                    Pengiriman hanya JNE dan J&T. Pembayaran via BCA, BRI, BSI. Lacak pesanan di menu Pesanan Saya`
+                    Pengiriman hanya JNE dan J&T. Pembayaran via BCA, BRI, BSI. Lacak pesanan di menu Pesanan Saya.
+                    Jika terdapat link produk, selalu tampilkan dalam format markdown: [Lihat Produk](URL_LINK).`
             },
             ...message
         ];

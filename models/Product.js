@@ -61,6 +61,9 @@ const productSchema = new mongoose.Schema({
   },
   uploadImageId: {
     type: String,
+  },
+  link: {
+    type: String,
   }
 });
 
