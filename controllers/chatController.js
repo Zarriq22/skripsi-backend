@@ -145,7 +145,7 @@ const handleChat = async (req, res) => {
             // Jika response mendapat productId
             const product = await Product.findById(productId);
             if (product) {
-                contextText = `${product.productName} — Rp${product.price} (stok ${product.stock}) — ${product.description} — Link: ${baseUrl}/${product.link}`;
+                contextText = `${product.productName} — Rp${product.price} (stok ${product.stock}) — ${product.description} — Link: ${baseUrl}${product.link}`;
             }
         } else {
             const userQuestion = message[message.length - 1]?.content;
@@ -212,7 +212,7 @@ const handleChat = async (req, res) => {
             if (searchResult.length) {
                 const contexts = searchResult.map((hit, i) => {
                     const p = hit.payload;
-                    return `${i + 1}. ${p.productName} — Rp${p.price} (stok ${p.stock}) — ${p.description} - Link: ${baseUrl}/${p.link}`;
+                    return `${i + 1}. ${p.productName} — Rp${p.price} (stok ${p.stock}) — ${p.description} - Link: ${baseUrl}${p.link}`;
                 }).join('\n');
                 contextText = `Berikut daftar produk relevan:\n${contexts}`;
             }
