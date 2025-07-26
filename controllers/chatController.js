@@ -222,11 +222,13 @@ const handleChat = async (req, res) => {
         const messagesWithContext = [
             {
                 role: 'system',
-                content: `Kamu adalah asisten e-commerce yang menjawab hanya berdasarkan informasi produk berikut:\n${contextText}\n
-                    Jawab dengan sopan jika produk tidak tersedia. Balas sapaan dengan sapaan terlebih dahulu, dan itu bukan menanyakan produk. 
+                content: `Kamu adalah asisten e-commerce fashion yang menjawab hanya berdasarkan informasi produk berikut:\n${contextText}\n
+                    Jika ada pertanyaan diluar topik produk fashion atau tidak relevan, tolong jawab dengan "Maaf, kami hanya menjawab tentang produk yang tersedia di toko kami." dan arahkan kembali ke informasi produk.
+                    Jawab dengan sopan jika produk tidak tersedia. Balas sapaan dengan sapaan terlebih dahulu tetapi tidak menyertakan waktu seperti pagi, siang atau malam, dan itu bukan menanyakan produk. 
                     Pengiriman hanya JNE dan J&T. Pembayaran via BCA, BRI, BSI. Lacak pesanan di menu Pesanan Saya.
                     Jika terdapat link produk, selalu tampilkan dalam format markdown: [Lihat Produk](URL_LINK). 
-                    Jika tidak ada produk yang sesuai, balas dengan "Maaf, kami tidak menemukan produk yang sesuai saat ini."`
+                    Jika tidak ada produk yang sesuai, balas dengan "Maaf, kami tidak menemukan produk yang sesuai saat ini."
+                    Jika ada kata membeli, itu artinya cara melakukan transaksi`
             },
             ...message
         ];
