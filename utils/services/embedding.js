@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
 
 const getEmbedding = async (text) => {
-  const response = await fetch(' https://03eb2c40a217.ngrok-free.app/embed', {
+  const response = await fetch(' https://7bf941184a77.ngrok-free.app/embed', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ text })

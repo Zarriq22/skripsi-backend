@@ -55,8 +55,8 @@ const getProductById = async (req, res) => {
 
 // POST produk baru
 const addProduct = async (req, res) => {
-  const { productName, price, stock, images, description, spesifikasi, wishList, wishListId, kategori, gender, rating, terjual } = req.body;
-  const product = new Product({ productName, price, stock, images, description, spesifikasi,wishList, wishListId, kategori, gender, rating, terjual });
+  const { productName, price, stock, images, description, spesifikasi, wishList, wishListId, kategori, gender, rating, terjual, imageProduct } = req.body;
+  const product = new Product({ productName, price, stock, images, description, spesifikasi,wishList, wishListId, kategori, gender, rating, terjual, imageProduct });
 
   await product.save();
   const products = [product];
@@ -79,7 +79,8 @@ const addProduct = async (req, res) => {
         stock: product.stock || 0,
         kategori: product.kategori || '',
         gender: product.gender || '',
-        link: `detail-product/${product._id}`
+        link: `detail-product/${product._id}`,
+        imageProduct: product.imageProduct
       }
     };
   }));
